@@ -2,7 +2,12 @@ import { useState, type FormEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { UploadCloud, Loader2 } from "lucide-react";
+import { UploadCloud, Loader2, Plus, Trash2 } from "lucide-react";
+
+interface SpecItem {
+  label: string;
+  value: string;
+}
 
 interface ProductRecord {
   id: string;
@@ -13,11 +18,26 @@ interface ProductRecord {
   category_slug: string;
   image_url: string;
   featured: boolean;
+  specifications?: unknown;
 }
 
 interface Props {
   initial?: ProductRecord;
   onSaved: () => void;
+}
+
+function parseSpecs(raw: unknown): SpecItem[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((s) =>
+      s && typeof s === "object" && "label" in s && "value" in s
+        ? {
+            label: String((s as Record<string, unknown>).label ?? ""),
+            value: String((s as Record<string, unknown>).value ?? ""),
+          }
+        : null,
+    )
+    .filter((x): x is SpecItem => !!x);
 }
 
 export function ProductForm({ initial, onSaved }: Props) {
@@ -29,6 +49,7 @@ export function ProductForm({ initial, onSaved }: Props) {
   const [categorySlug, setCategorySlug] = useState(initial?.category_slug ?? "");
   const [imageUrl, setImageUrl] = useState(initial?.image_url ?? "");
   const [featured, setFeatured] = useState(initial?.featured ?? false);
+  const [specs, setSpecs] = useState<SpecItem[]>(parseSpecs(initial?.specifications));
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -61,12 +82,20 @@ export function ProductForm({ initial, onSaved }: Props) {
     }
   };
 
+  const updateSpec = (i: number, field: keyof SpecItem, val: string) =>
+    setSpecs((prev) => prev.map((s, idx) => (idx === i ? { ...s, [field]: val } : s)));
+  const addSpec = () => setSpecs((prev) => [...prev, { label: "", value: "" }]);
+  const removeSpec = (i: number) => setSpecs((prev) => prev.filter((_, idx) => idx !== i));
+
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (!imageUrl) return toast.error("Please upload an image");
     if (!categorySlug) return toast.error("Please select a category");
     setSaving(true);
     try {
+      const cleanSpecs = specs
+        .map((s) => ({ label: s.label.trim(), value: s.value.trim() }))
+        .filter((s) => s.label || s.value);
       const payload = {
         title: title.trim(),
         description: description.trim(),
@@ -75,6 +104,7 @@ export function ProductForm({ initial, onSaved }: Props) {
         category_slug: categorySlug,
         image_url: imageUrl,
         featured,
+        specifications: cleanSpecs,
       };
       if (initial) {
         const { error } = await supabase.from("products").update(payload).eq("id", initial.id);
@@ -132,6 +162,54 @@ export function ProductForm({ initial, onSaved }: Props) {
           </label>
         </div>
       </Field>
+
+      {/* Technical specifications */}
+      <div>
+        <div className="mb-2 flex items-center justify-between">
+          <span className="block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Technical specifications
+          </span>
+          <button
+            type="button"
+            onClick={addSpec}
+            className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs font-medium hover:bg-muted"
+          >
+            <Plus className="h-3.5 w-3.5" /> Add row
+          </button>
+        </div>
+        {specs.length === 0 ? (
+          <p className="rounded-lg border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
+            No specifications yet. Click <strong>Add row</strong> to add things like Wattage, Material, Dimensions, etc.
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {specs.map((s, i) => (
+              <div key={i} className="grid grid-cols-[1fr_1.5fr_auto] gap-2">
+                <input
+                  placeholder="Label (e.g. Wattage)"
+                  value={s.label}
+                  onChange={(e) => updateSpec(i, "label", e.target.value)}
+                  className={inputCls}
+                />
+                <input
+                  placeholder="Value (e.g. 60W)"
+                  value={s.value}
+                  onChange={(e) => updateSpec(i, "value", e.target.value)}
+                  className={inputCls}
+                />
+                <button
+                  type="button"
+                  onClick={() => removeSpec(i)}
+                  className="grid h-10 w-10 place-items-center rounded-md border border-border text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                  aria-label="Remove specification"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       <label className="flex cursor-pointer items-center justify-between rounded-xl border border-border bg-secondary/40 p-4">
         <div>
