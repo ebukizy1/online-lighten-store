@@ -108,9 +108,9 @@ function ShopPage() {
                 </button>
               ))}
               <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                onClick={() => { setPage((p) => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: "smooth" }); }}
                 disabled={page === totalPages}
-                className="grid h-9 w-9 place-items-center rounded-full border border-border disabled:opacity-40"
+                className="grid h-9 w-9 place-items-center rounded-full border border-border disabled:opacity-40 transition hover:bg-muted"
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
