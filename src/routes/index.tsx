@@ -56,6 +56,18 @@ function Home() {
     },
   });
 
+  const { data: allProducts, isLoading: loadingAll } = useQuery({
+    queryKey: ["products", "home-all"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("id,title,price,old_price,image_url,category_slug")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data as ProductCardData[];
+    },
+  });
+
   return (
     <div>
       {/* HERO */}
