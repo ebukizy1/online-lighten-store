@@ -6,11 +6,32 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/format";
 import { WhatsAppButton } from "@/components/site/WhatsAppButton";
+import { ProductCard, type ProductCardData } from "@/components/site/ProductCard";
 import { cart } from "@/lib/cart";
 
 export const Route = createFileRoute("/product/$id")({
   component: ProductPage,
 });
+
+interface SpecItem {
+  label: string;
+  value: string;
+}
+
+function parseSpecs(raw: unknown): SpecItem[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((s) => {
+      if (s && typeof s === "object" && "label" in s && "value" in s) {
+        return {
+          label: String((s as Record<string, unknown>).label ?? ""),
+          value: String((s as Record<string, unknown>).value ?? ""),
+        };
+      }
+      return null;
+    })
+    .filter((x): x is SpecItem => !!x && (!!x.label || !!x.value));
+}
 
 function ProductPage() {
   const { id } = Route.useParams();
@@ -23,6 +44,22 @@ function ProductPage() {
       if (error) throw error;
       if (!data) throw notFound();
       return data;
+    },
+  });
+
+  const { data: related } = useQuery({
+    enabled: !!product,
+    queryKey: ["related", product?.category_slug, product?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("id,title,price,old_price,image_url,category_slug")
+        .eq("category_slug", product!.category_slug)
+        .neq("id", product!.id)
+        .order("created_at", { ascending: false })
+        .limit(4);
+      if (error) throw error;
+      return data as ProductCardData[];
     },
   });
 
@@ -40,6 +77,7 @@ function ProductPage() {
   }
   if (!product) return null;
   const hasSale = product.old_price && Number(product.old_price) > Number(product.price);
+  const specs = parseSpecs((product as { specifications?: unknown }).specifications);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -100,6 +138,44 @@ function ProductPage() {
           <p className="mt-3 text-xs text-muted-foreground">Tap to message us — we reply within minutes.</p>
         </div>
       </div>
+
+      {/* SPECIFICATIONS */}
+      {specs.length > 0 && (
+        <section className="mt-16">
+          <p className="text-[10px] uppercase tracking-[0.25em] text-gold">Details</p>
+          <h2 className="mt-1 font-display text-2xl font-semibold sm:text-3xl">Technical specifications</h2>
+          <div className="mt-6 overflow-hidden rounded-2xl border border-border">
+            <dl className="divide-y divide-border">
+              {specs.map((s, i) => (
+                <div key={i} className="grid grid-cols-3 gap-4 px-5 py-3.5 text-sm sm:grid-cols-4">
+                  <dt className="col-span-1 font-medium text-muted-foreground">{s.label}</dt>
+                  <dd className="col-span-2 sm:col-span-3 text-foreground">{s.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </section>
+      )}
+
+      {/* RELATED PRODUCTS */}
+      {related && related.length > 0 && (
+        <section className="mt-20">
+          <div className="mb-6 flex items-end justify-between">
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.25em] text-gold">You may also like</p>
+              <h2 className="mt-1 font-display text-2xl font-semibold sm:text-3xl">Related products</h2>
+            </div>
+            <Link to="/category/$slug" params={{ slug: product.category_slug }} className="text-xs font-medium text-muted-foreground hover:text-foreground sm:text-sm">
+              View all →
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
+            {related.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
