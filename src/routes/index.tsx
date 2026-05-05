@@ -2,11 +2,25 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
-import { ArrowRight, Sparkles, ShieldCheck, Zap, Eye, ChevronLeft, ChevronRight } from "lucide-react";
+import Autoplay from "embla-carousel-autoplay";
+import {
+  ArrowRight,
+  Sparkles,
+  ShieldCheck,
+  Zap,
+  Eye,
+  ChevronLeft,
+  ChevronRight,
+  Crown,
+  Lightbulb,
+  Lamp,
+  PanelTop,
+  Sun,
+  TreePine,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductCard, type ProductCardData } from "@/components/site/ProductCard";
 import heroImg from "@/assets/hero-chandelier.jpg";
-import heroVideo from "@/assets/hero-parlor.mp4.asset.json";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -19,12 +33,12 @@ export const Route = createFileRoute("/")({
 });
 
 const categories = [
-  { slug: "chandeliers", name: "Chandeliers" },
-  { slug: "pendant-lights", name: "Pendant" },
-  { slug: "led-lights", name: "LED" },
-  { slug: "wall-brackets", name: "Wall" },
-  { slug: "ceiling-lights", name: "Ceiling" },
-  { slug: "outdoor-lighting", name: "Outdoor" },
+  { slug: "chandeliers", name: "Chandeliers", Icon: Crown },
+  { slug: "pendant-lights", name: "Pendant", Icon: Lamp },
+  { slug: "led-lights", name: "LED", Icon: Lightbulb },
+  { slug: "wall-brackets", name: "Wall", Icon: PanelTop },
+  { slug: "ceiling-lights", name: "Ceiling", Icon: Sun },
+  { slug: "outdoor-lighting", name: "Outdoor", Icon: TreePine },
 ];
 
 function Home() {
@@ -46,18 +60,13 @@ function Home() {
     <div>
       {/* HERO */}
       <section className="relative overflow-hidden bg-ink text-glow">
-        <video
-          src={heroVideo.url}
-          poster={heroImg}
-          autoPlay
-          muted
-          loop
-          playsInline
+        <img
+          src={heroImg}
+          alt=""
           className="absolute inset-0 h-full w-full object-cover opacity-50"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-ink/70 via-ink/60 to-ink/90" />
 
-        {/* softer, cooler glow orbs */}
         <div className="pointer-events-none absolute -top-32 -left-24 h-[380px] w-[380px] rounded-full bg-amber-200/20 opacity-40 blur-3xl animate-glow" />
         <div className="pointer-events-none absolute -bottom-32 -right-24 h-[440px] w-[440px] rounded-full bg-orange-200/10 opacity-30 blur-3xl animate-glow" style={{ animationDelay: "2s" }} />
 
@@ -121,16 +130,21 @@ function Home() {
           </Link>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
-          {categories.map((c) => (
+          {categories.map(({ slug, name, Icon }) => (
             <Link
-              key={c.slug}
+              key={slug}
               to="/category/$slug"
-              params={{ slug: c.slug }}
-              className="group relative flex aspect-square flex-col items-center justify-center overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-br from-ink via-ink to-zinc-900 p-3 text-center text-glow transition-all hover:border-gold hover:shadow-glow"
+              params={{ slug }}
+              className="group category-tile relative flex aspect-square flex-col items-center justify-center overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-br from-ink via-ink to-zinc-900 p-3 text-center text-glow transition-all duration-500 hover:border-gold hover:shadow-glow"
             >
+              {/* shimmer sweep */}
+              <span className="shimmer pointer-events-none absolute inset-0" aria-hidden />
               <span className="pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-gold/20 blur-2xl transition-opacity group-hover:opacity-100 sm:opacity-60" />
-              <p className="relative font-display text-sm font-semibold sm:text-base">{c.name}</p>
-              <p className="relative mt-1 text-[10px] uppercase tracking-widest text-gold/80">
+              <span className="relative grid h-10 w-10 place-items-center rounded-full bg-gold/10 text-gold transition-all duration-500 group-hover:bg-gold group-hover:text-ink group-hover:scale-110">
+                <Icon className="h-5 w-5" />
+              </span>
+              <p className="relative mt-2 font-display text-sm font-semibold sm:text-base">{name}</p>
+              <p className="relative mt-0.5 text-[10px] uppercase tracking-widest text-gold/80">
                 Shop →
               </p>
             </Link>
@@ -165,7 +179,10 @@ function Home() {
 }
 
 function FeaturedCarousel({ products }: { products: ProductCardData[] }) {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ align: "start", loop: false });
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    { align: "start", loop: true },
+    [Autoplay({ delay: 4000, stopOnInteraction: false, stopOnMouseEnter: true })],
+  );
   const [selected, setSelected] = useState(0);
   const [snaps, setSnaps] = useState<number[]>([]);
 
@@ -196,7 +213,6 @@ function FeaturedCarousel({ products }: { products: ProductCardData[] }) {
         </div>
       </div>
 
-      {/* arrows */}
       <button
         aria-label="Previous"
         onClick={() => emblaApi?.scrollPrev()}
@@ -212,7 +228,6 @@ function FeaturedCarousel({ products }: { products: ProductCardData[] }) {
         <ChevronRight className="h-4 w-4" />
       </button>
 
-      {/* pagination dots */}
       <div className="mt-6 flex justify-center gap-1.5">
         {snaps.map((_, i) => (
           <button
