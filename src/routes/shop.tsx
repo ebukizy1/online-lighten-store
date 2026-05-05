@@ -90,16 +90,16 @@ function ShopPage() {
           {totalPages > 1 && (
             <div className="mt-10 flex items-center justify-center gap-2">
               <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                onClick={() => { setPage((p) => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: "smooth" }); }}
                 disabled={page === 1}
-                className="grid h-9 w-9 place-items-center rounded-full border border-border disabled:opacity-40"
+                className="grid h-9 w-9 place-items-center rounded-full border border-border disabled:opacity-40 transition hover:bg-muted"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
               {Array.from({ length: totalPages }).map((_, i) => (
                 <button
                   key={i}
-                  onClick={() => setPage(i + 1)}
+                  onClick={() => { setPage(i + 1); window.scrollTo({ top: 0, behavior: "smooth" }); }}
                   className={`h-9 min-w-9 rounded-full border px-3 text-xs font-semibold ${
                     page === i + 1 ? "border-foreground bg-foreground text-background" : "border-border hover:bg-muted"
                   }`}
