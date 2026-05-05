@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import {
@@ -51,6 +51,18 @@ function Home() {
         .eq("featured", true)
         .order("created_at", { ascending: false })
         .limit(12);
+      if (error) throw error;
+      return data as ProductCardData[];
+    },
+  });
+
+  const { data: allProducts, isLoading: loadingAll } = useQuery({
+    queryKey: ["products", "home-all"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("id,title,price,old_price,image_url,category_slug")
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return data as ProductCardData[];
     },
@@ -174,6 +186,88 @@ function Home() {
           )}
         </div>
       </section>
+
+      {/* ALL PRODUCTS */}
+      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
+        <div className="mb-6 flex items-end justify-between sm:mb-10">
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.25em] text-gold">Catalog</p>
+            <h2 className="mt-1 font-display text-2xl font-semibold sm:text-4xl">All products</h2>
+          </div>
+          <Link to="/shop" className="text-xs font-medium text-muted-foreground hover:text-foreground sm:text-sm">
+            View all →
+          </Link>
+        </div>
+        {loadingAll ? (
+          <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="aspect-[4/5] animate-pulse rounded-2xl bg-muted" />
+            ))}
+          </div>
+        ) : allProducts && allProducts.length > 0 ? (
+          <AllProductsPaginated products={allProducts} />
+        ) : (
+          <p className="text-sm text-muted-foreground">No products yet.</p>
+        )}
+      </section>
+    </div>
+  );
+}
+
+const PAGE_SIZE = 8;
+
+function AllProductsPaginated({ products }: { products: ProductCardData[] }) {
+  const [page, setPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(products.length / PAGE_SIZE));
+  const paged = useMemo(
+    () => products.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [products, page],
+  );
+  const go = (p: number) => {
+    setPage(p);
+    const el = document.getElementById("home-all-products-top");
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+  return (
+    <div id="home-all-products-top">
+      <div key={page} className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4 animate-fade-in-page">
+        {paged.map((p) => (
+          <ProductCard key={p.id} product={p} />
+        ))}
+      </div>
+      {totalPages > 1 && (
+        <div className="mt-10 flex items-center justify-center gap-2">
+          <button
+            onClick={() => go(Math.max(1, page - 1))}
+            disabled={page === 1}
+            className="grid h-9 w-9 place-items-center rounded-full border border-border disabled:opacity-40 transition hover:bg-muted"
+            aria-label="Previous page"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          {Array.from({ length: totalPages }).map((_, i) => (
+            <button
+              key={i}
+              onClick={() => go(i + 1)}
+              className={`h-9 min-w-9 rounded-full border px-3 text-xs font-semibold ${
+                page === i + 1
+                  ? "border-foreground bg-foreground text-background"
+                  : "border-border hover:bg-muted"
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+          <button
+            onClick={() => go(Math.min(totalPages, page + 1))}
+            disabled={page === totalPages}
+            className="grid h-9 w-9 place-items-center rounded-full border border-border disabled:opacity-40 transition hover:bg-muted"
+            aria-label="Next page"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
