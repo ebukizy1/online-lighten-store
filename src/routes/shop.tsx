@@ -25,7 +25,7 @@ const cats = [
   { slug: "outdoor-lighting", name: "Outdoor" },
 ];
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 8;
 
 function ShopPage() {
   const [page, setPage] = useState(1);
@@ -81,7 +81,7 @@ function ShopPage() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
+          <div key={page} className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4 animate-fade-in-page">
             {paged.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
