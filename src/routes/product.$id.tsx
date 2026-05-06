@@ -8,6 +8,7 @@ import { formatPrice } from "@/lib/format";
 import { WhatsAppButton } from "@/components/site/WhatsAppButton";
 import { ProductCard, type ProductCardData } from "@/components/site/ProductCard";
 import { cart } from "@/lib/cart";
+import { optimizeImage, srcSet } from "@/lib/image";
 
 export const Route = createFileRoute("/product/$id")({
   component: ProductPage,
@@ -92,8 +93,12 @@ function ProductPage() {
           onMouseLeave={() => setZoom(false)}
         >
           <img
-            src={product.image_url}
+            src={optimizeImage(product.image_url, { width: 1000 })}
+            srcSet={srcSet(product.image_url, [640, 900, 1200, 1600])}
+            sizes="(min-width:1024px) 50vw, 100vw"
             alt={product.title}
+            fetchPriority="high"
+            decoding="async"
             className={`h-full w-full object-cover transition-transform duration-700 ${zoom ? "scale-125" : "scale-100"}`}
           />
           <span className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-background/80 backdrop-blur">
