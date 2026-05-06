@@ -15,7 +15,7 @@ export interface ProductCardData {
   category_slug: string;
 }
 
-export function ProductCard({ product }: { product: ProductCardData }) {
+export function ProductCard({ product, priority = false }: { product: ProductCardData; priority?: boolean }) {
   const hasSale = product.old_price && product.old_price > product.price;
   const addToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -27,17 +27,24 @@ export function ProductCard({ product }: { product: ProductCardData }) {
     });
     toast.success(`${product.title} added to cart`);
   };
+  const optimized = optimizeImage(product.image_url, { width: 600 });
+  const set = srcSet(product.image_url, [320, 480, 640, 800]);
   return (
     <div className="product-card group block overflow-hidden rounded-2xl border border-border/70 bg-card transition hover:shadow-soft">
       <Link to="/product/$id" params={{ id: product.id }} className="block">
         <div className="relative aspect-[4/5] overflow-hidden bg-muted">
           <img
-            src={optimizeImage(product.image_url, { width: 600 })}
-            srcSet={srcSet(product.image_url, [320, 480, 640, 800])}
-            sizes="(min-width:1024px) 25vw, (min-width:640px) 33vw, 50vw"
+            src={optimized}
+            srcSet={set || undefined}
+            sizes={set ? "(min-width:1024px) 25vw, (min-width:640px) 33vw, 50vw" : undefined}
             alt={product.title}
-            loading="lazy"
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : "auto"}
             decoding="async"
+            onError={(e) => {
+              const img = e.currentTarget;
+              if (img.src !== product.image_url) img.src = product.image_url;
+            }}
             className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
           {hasSale && (
