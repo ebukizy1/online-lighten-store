@@ -15,9 +15,9 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link to="/" className="flex items-center gap-2">
-          <span className="grid h-9 w-9 place-items-center rounded-full bg-ink text-glow shadow-glow">
-            <span className="font-display text-lg text-gold">O</span>
+        <Link to="/" className="flex items-center gap-2.5">
+          <span className="grid h-9 w-9 place-items-center rounded-full bg-ink shadow-glow ring-1 ring-gold/40">
+            <img src="/favicon.png" alt="" className="h-6 w-6 object-contain" />
           </span>
           <span className="font-display text-lg font-semibold tracking-tight">
             Online<span className="text-gold">Lighten</span>
