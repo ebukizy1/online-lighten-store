@@ -4,6 +4,7 @@ import { formatPrice } from "@/lib/format";
 import { WhatsAppButton } from "./WhatsAppButton";
 import { cart } from "@/lib/cart";
 import { toast } from "sonner";
+import { optimizeImage, srcSet } from "@/lib/image";
 
 export interface ProductCardData {
   id: string;
@@ -31,9 +32,12 @@ export function ProductCard({ product }: { product: ProductCardData }) {
       <Link to="/product/$id" params={{ id: product.id }} className="block">
         <div className="relative aspect-[4/5] overflow-hidden bg-muted">
           <img
-            src={product.image_url}
+            src={optimizeImage(product.image_url, { width: 600 })}
+            srcSet={srcSet(product.image_url, [320, 480, 640, 800])}
+            sizes="(min-width:1024px) 25vw, (min-width:640px) 33vw, 50vw"
             alt={product.title}
             loading="lazy"
+            decoding="async"
             className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
           {hasSale && (
