@@ -72,26 +72,44 @@ function Home() {
     <div>
       {/* HERO */}
       <section className="relative overflow-hidden bg-ink text-glow">
+        {/* LCP poster image — loads instantly */}
         <img
           src={heroImg}
           alt=""
-          className="absolute inset-0 h-full w-full object-cover opacity-50"
+          aria-hidden
+          fetchPriority="high"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover opacity-60 hero-kenburns"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-ink/70 via-ink/60 to-ink/90" />
+        {/* Cinematic chandelier video — lazy mounted, fades in over the poster */}
+        <video
+          src="/__l5e/assets-v1/7be9e8eb-c569-4c9a-a2f7-81b37d773694/hero-parlor.mp4"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          poster={heroImg}
+          className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-1000 [&[data-loaded='true']]:opacity-70"
+          onLoadedData={(e) => e.currentTarget.setAttribute("data-loaded", "true")}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-ink/80 via-ink/55 to-ink/95" />
+        {/* Vignette */}
+        <div className="absolute inset-0 [background:radial-gradient(ellipse_at_center,transparent_40%,rgba(0,0,0,0.55)_100%)]" />
 
         <div className="pointer-events-none absolute -top-32 -left-24 h-[380px] w-[380px] rounded-full bg-amber-200/20 opacity-40 blur-3xl animate-glow" />
         <div className="pointer-events-none absolute -bottom-32 -right-24 h-[440px] w-[440px] rounded-full bg-orange-200/10 opacity-30 blur-3xl animate-glow" style={{ animationDelay: "2s" }} />
 
         <div className="relative mx-auto flex min-h-[78vh] max-w-7xl flex-col justify-center px-4 py-20 sm:min-h-[88vh] sm:px-6 lg:px-8">
           <div className="max-w-xl animate-fade-up">
-            <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-glow/5 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-gold">
+            <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-glow/5 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-gold backdrop-blur">
               <Sparkles className="h-3 w-3" /> OnlineLighten
             </span>
             <h1 className="mt-5 font-display text-4xl font-bold leading-[1.05] sm:text-6xl lg:text-7xl">
               Light that <span className="gradient-gold-text">moves you.</span>
             </h1>
-            <p className="mt-4 max-w-md text-sm text-glow/75 sm:text-base">
-              Modern fixtures for every room. Delivered nationwide.
+            <p className="mt-4 max-w-md text-sm text-glow/80 sm:text-base">
+              Hand-picked chandeliers, LEDs and outdoor fixtures — modern design, delivered nationwide.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
@@ -103,7 +121,7 @@ function Home() {
               </Link>
               <Link
                 to="/about"
-                className="inline-flex items-center gap-2 rounded-full border border-glow/30 px-6 py-3 text-sm font-semibold text-glow hover:bg-glow/10"
+                className="inline-flex items-center gap-2 rounded-full border border-glow/30 px-6 py-3 text-sm font-semibold text-glow hover:bg-glow/10 backdrop-blur"
               >
                 Our Story
               </Link>
