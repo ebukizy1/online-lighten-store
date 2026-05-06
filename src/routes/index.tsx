@@ -243,8 +243,8 @@ function AllProductsPaginated({ products }: { products: ProductCardData[] }) {
   return (
     <div id="home-all-products-top">
       <div key={page} className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4 animate-fade-in-page">
-        {paged.map((p) => (
-          <ProductCard key={p.id} product={p} />
+        {paged.map((p, i) => (
+          <ProductCard key={p.id} product={p} priority={page === 1 && i < 4} />
         ))}
       </div>
       {totalPages > 1 && (
