@@ -70,35 +70,29 @@ function Home() {
 
   return (
     <div>
-      {/* HERO */}
+      {/* HERO — cinematic, instant-load */}
       <section className="relative overflow-hidden bg-ink text-glow">
-        {/* LCP poster image — loads instantly */}
+        {/* Background poster — instant LCP, animated like a film plate */}
         <img
           src={heroImg}
           alt=""
           aria-hidden
           fetchPriority="high"
           decoding="async"
-          className="absolute inset-0 h-full w-full object-cover opacity-60 hero-kenburns"
+          className="absolute inset-0 h-full w-full object-cover hero-kenburns hero-flicker"
         />
-        {/* Cinematic chandelier video — lazy mounted, fades in over the poster */}
-        <video
-          src="/__l5e/assets-v1/7be9e8eb-c569-4c9a-a2f7-81b37d773694/hero-parlor.mp4"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          poster={heroImg}
-          className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-1000 [&[data-loaded='true']]:opacity-70"
-          onLoadedData={(e) => e.currentTarget.setAttribute("data-loaded", "true")}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-ink/80 via-ink/55 to-ink/95" />
+        {/* Cinematic dim + warm grade */}
+        <div className="absolute inset-0 bg-gradient-to-b from-ink/85 via-ink/55 to-ink/95" />
+        <div className="absolute inset-0 mix-blend-soft-light [background:radial-gradient(ellipse_at_50%_30%,rgba(255,200,120,0.35),transparent_60%)]" />
         {/* Vignette */}
-        <div className="absolute inset-0 [background:radial-gradient(ellipse_at_center,transparent_40%,rgba(0,0,0,0.55)_100%)]" />
+        <div className="absolute inset-0 [background:radial-gradient(ellipse_at_center,transparent_40%,rgba(0,0,0,0.65)_100%)]" />
+        {/* Sweeping light ray */}
+        <div className="pointer-events-none absolute inset-0 hero-rays" aria-hidden />
+        {/* Floating dust motes */}
+        <div className="pointer-events-none absolute inset-0 hero-dust" aria-hidden />
 
-        <div className="pointer-events-none absolute -top-32 -left-24 h-[380px] w-[380px] rounded-full bg-amber-200/20 opacity-40 blur-3xl animate-glow" />
-        <div className="pointer-events-none absolute -bottom-32 -right-24 h-[440px] w-[440px] rounded-full bg-orange-200/10 opacity-30 blur-3xl animate-glow" style={{ animationDelay: "2s" }} />
+        <div className="pointer-events-none absolute -top-32 -left-24 h-[380px] w-[380px] rounded-full bg-amber-200/25 blur-3xl animate-glow" />
+        <div className="pointer-events-none absolute -bottom-32 -right-24 h-[440px] w-[440px] rounded-full bg-orange-300/15 blur-3xl animate-glow" style={{ animationDelay: "2s" }} />
 
         <div className="relative mx-auto flex min-h-[78vh] max-w-7xl flex-col justify-center px-4 py-20 sm:min-h-[88vh] sm:px-6 lg:px-8">
           <div className="max-w-xl animate-fade-up">
